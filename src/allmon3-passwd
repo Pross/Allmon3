@@ -11,6 +11,7 @@ import argparse
 import csv
 import logging
 import sys
+import os
 
 from getpass import GetPassWarning, getpass
 
@@ -21,6 +22,11 @@ def get_user_index(lst, k, v):
         if dic[k] == v:
             return i
     return -1
+
+def is_root() -> bool:
+    if "posix" in os.name and os.geteuid() == 0:
+        return True
+    return False
 
 # Args and Log Setup
 ap = argparse.ArgumentParser(description="Manage Allmon3 password file")
@@ -37,6 +43,10 @@ lh = logging.StreamHandler()
 lf = logging.Formatter(fmt="%(name)s: %(levelname)s: %(message)s")
 lh.setFormatter(lf)
 log.addHandler(lh)
+
+if not is_root():
+    print("allmon3-passwd must be run as root or with sudo.")
+    sys.exit(-1)
 
 if args.debug:
     log.setLevel(logging.DEBUG)
